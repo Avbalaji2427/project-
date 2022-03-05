@@ -4,4 +4,4 @@ var request = HttpRequest.newBuilder(
    .header("accept", "application/json")
    .build();
 var response = client.send(request, new JsonBodyHandler<>(APPOINTMENT.class));
-System.out.println(response.body().get().title);
+System.out.println(response.body().get().APPOINTMENT BOOKED);
