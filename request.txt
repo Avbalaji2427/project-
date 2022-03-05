@@ -1,0 +1,7 @@
+var client = HttpClient.newHttpClient();
+var request = HttpRequest.newBuilder(
+       URI.create("https://appointment.com"))
+   .header("accept", "application/json")
+   .build();
+var response = client.send(request, new JsonBodyHandler<>(APPOINTMENT.class));
+System.out.println(response.body().get().title);
