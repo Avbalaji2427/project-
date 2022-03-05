@@ -1,0 +1,148 @@
+public class Notification extends Receiver {
+
+
+@Override
+public void onReceive(Context context, Intent intent) {
+
+    Log.d("NOTIF","YESSSS, IT's WORKING");
+
+    NotifJobIntentService.enqueueWork(context,intent);
+
+}}
+
+public class NotifJobIntentService extends JobIntentService {
+
+private static final String TAG = "NotifJobIntentService";
+private Context context;
+
+static void enqueueWork(Context context, Intent intent) {
+    enqueueWork(context, NotifJobIntentService.class, 123 , intent);
+}
+
+
+@Override
+public void onCreate() {
+    super.onCreate();
+    Log.d(TAG, "onCreate");
+}
+
+@Override
+protected void onHandleWork(@NonNull Intent intent) {
+    context = getApplicationContext();
+
+    Log.d(TAG, "OnHandleWork");
+
+    String input = intent.getStringExtra("inputExtra");
+
+    intent.setFlags(intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+    Intent intent1 = new Intent(context , MainFragment.class);
+    PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
+
+    Notification.Builder builder = new Notification.Builder(context)
+            .setTicker("Notification")
+            .setContentTitle("Important Message")
+            .setContentText("This is an example of a push notification using a Navigation Manager")
+            .setSmallIcon(R.drawable.ic_add)
+            .setContentIntent(pIntent);
+
+    NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+    {
+        String channelId = "Your_channel_id";
+        NotificationChannel channel = new NotificationChannel(
+                channelId,
+                "Reminder to remind to review your notes",
+                NotificationManager.IMPORTANCE_HIGH);
+        channel.setDescription("Hello Dear friends"); //this is to test what this is
+        notificationManager.createNotificationChannel(channel);
+        builder.setChannelId(channelId);
+    }
+
+
+    Notification notification = builder.build();
+    notification.flags = Notification.FLAG_AUTO_CANCEL;
+
+
+
+    notificationManager.notify(0, notification);
+}
+
+@Override
+public void onDestroy() {
+    super.onDestroy();
+    Log.d(TAG, "onDestroy");
+}
+
+@Override
+public boolean onStopCurrentWork() {
+    Log.d(TAG, "onStopCurrentWork");
+    return false;
+}
+}
+
+
+private void setNotification(){
+
+    
+
+
+
+    Calendar time = Calendar.getInstance();
+
+    time.set(Calendar.HOUR_OF_DAY,11);
+    time.set(Calendar.MINUTE, 30);
+    time.set(Calendar.SECOND,0);
+
+
+    NotificationManager am =( NotificationManager)getContext().getSystemService(Context.Notification_SERVICE);
+    Intent i = new Intent(getActivity(), Notification.class);
+    i.setAction("android.intent.action.NOTIFY");
+    PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, i, PendingIntent.FLAG_ONE_SHOT);
+
+
+    if (Build.VERSION.SDK_INT >= 23){
+        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,time.getTimeInMillis(),pi);
+    }
+
+    else{
+        am.set(AlarmManager.RTC_WAKEUP,time.getTimeInMillis(),pi);
+    }
+
+}
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+package="Appointment.schema">
+
+
+<application
+    android:name=".CustomApplication"
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:supportsRtl="true"
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+    <activity android:name=".MainActivity">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
+    <activity android:name=".ListActivity"></activity>
+
+    <activity android:name=".MenuItemActivity"></activity>
+
+    <service
+        android:name=".NotifJobIntentService"
+        android:permission="android.permission.BIND_JOB_SERVICE"
+        android:exported="true"
+        android:enabled="true"/>
+
+    <receiver android:name=".AlarmReceiver" android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.NOTIFY">
+
+            </action>
+        </intent-filter>
